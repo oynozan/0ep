@@ -1,0 +1,141 @@
+#sidebar {
+    position: relative;
+    display: flex;
+    z-index: 3;
+
+    > .left {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 0;
+        height: 100dvh;
+        width: 70px;
+        background: rgb(40, 40, 43);
+        z-index: 2;
+
+        .settings {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+
+            button {
+                position: relative;
+                height: 30px;
+
+                svg {
+                    font-size: 30px;
+                    transition: 200ms;
+                    cursor: pointer;
+    
+                    &:hover {
+                        fill: rgb(182, 182, 182);
+                    }
+                }
+            }
+        }
+    }
+
+    > .right {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        height: 100dvh;
+        width: 400px;
+        background: var(--gray);
+        box-shadow: 2px 0 10px 2px #00000020;
+
+        .top {
+            position: relative;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+    
+            .search-bar {
+                display: flex;
+                align-items: center;
+                width: 100%;
+                height: 40px;
+                background: var(--l-gray);
+                padding: 7px 10px;
+                border-radius: 12px;
+    
+                input {
+                    width: 100%;
+                    padding: 0 10px;
+                    background: transparent;
+                    font-size: 16px;
+    
+                    &::placeholder {
+                        color: rgb(184, 184, 184);
+                    }
+                }
+    
+                svg {
+                    width: 20px;
+                    color: rgb(184, 184, 184);
+                }
+            }
+    
+            .tags {
+                width: 100%;
+                height: 60px;
+                display: flex;
+                align-items: center;
+                justify-content: flex-start;
+                gap: 15px;
+    
+                > div {
+                    padding: 7px 14px;
+                    background: rgba(255, 255, 255, .2);
+                    color: var(--light);
+                    border-radius: 50px;
+                    transition: 100ms;
+                    cursor: pointer;
+    
+                    &:hover {
+                        background: rgba(255, 255, 255, .26);
+                    }
+    
+                    &.active {
+                        background: rgba(110, 56, 247, 0.3);
+                        color: rgb(153, 90, 255);
+    
+                        &:hover {
+                            background: rgba(110, 56, 247, 0.4);
+                        }
+                    }
+                }
+            }
+        }
+    
+        .chats {
+            flex: 1;
+        }
+    
+        .add {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+            background: var(--darker);
+            color: rgb(95, 95, 95);
+            font-size: 18px;
+            transition: 250ms;
+            cursor: pointer;
+    
+            &:hover {
+                background: rgb(33, 33, 36);
+                color: rgb(182, 182, 182);
+            }
+    
+            svg {
+                font-size: 30px;
+            }
+        }
+    }
+}

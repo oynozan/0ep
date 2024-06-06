@@ -1,0 +1,42 @@
+.button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    padding: 12px 40px;
+    border-radius: 12px;
+    font-weight: 500;
+
+    &.main {
+        color: var(--light);
+        background: var(--main);
+
+        &:hover {
+            background: var(--second);
+        }
+    }
+
+    &.purple {
+        color: var(--light);
+        background: #7289da;
+        border-radius: 4px;
+        font-size: 18px;
+        padding: 12px;
+        font-weight: 600;
+
+        &:hover {
+            background: #7c72da;
+        }
+    }
+
+    &.blank {
+        padding: 0;
+    }
+
+    img {
+        height: 22px;
+    }
+}

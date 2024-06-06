@@ -1,0 +1,107 @@
+@import "fonts";
+@import "mixins";
+@import "overrides";
+
+:root {
+    --light: #f5f5f5;
+    --main: #5518ed;
+    --second: #6e38f7;
+    --second-10: rgba(110, 56, 247, 0.1);
+
+    --dark: rgb(41, 44, 46);
+    --darker: rgb(29, 31, 32);
+    --gray: rgb(54, 54, 58);
+    --gray2: rgb(52, 52, 56);
+    --l-gray: rgb(76, 77, 78);
+
+    --green: rgb(197, 255, 74);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--dark);
+    overflow: hidden;
+    font-family: "Inter";
+    color: var(--light);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+    margin: 0;
+
+    span {
+        color: var(--second);
+        font-weight: 500;
+    }
+}
+
+a,
+button {
+    color: var(--light);
+    transition: 200ms;
+    cursor: pointer;
+}
+
+a {
+    text-decoration: none;
+
+    &:hover {
+        color: var(--second);
+    }
+}
+
+input,
+textarea,
+button {
+    font-family: "Poppins";
+    border: none;
+    outline: none;
+    transition: 200ms;
+    color: var(--light);
+}
+
+main {
+    position: relative;
+    display: block;
+    margin: 0 auto;
+    max-width: 1800px;
+
+    img {
+        -webkit-user-drag: none;
+        -khtml-user-drag: none;
+        -moz-user-drag: none;
+        -o-user-drag: none;
+    }
+}
+
+::selection {
+    background: #5418ed7c;
+}
+
+::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+}
+::-webkit-scrollbar-track {
+    background: var(--dark);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--second);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--main);
+}

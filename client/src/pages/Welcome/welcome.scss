@@ -1,0 +1,33 @@
+#welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    background-image: url("../../../public/images/background.svg");
+    box-shadow: inset 0 0 140px 60px var(--dark);
+    border-radius: 100px;
+
+    img {
+        width: 40%;
+        margin-top: -30px;
+        margin-bottom: 50px;
+    }
+
+    h1 {
+        font-size: 65px;
+        text-align: center;
+        -webkit-text-fill-color: #0000;
+        background: -webkit-linear-gradient(270deg, var(--light) 20%, var(--second));
+        -webkit-background-clip: text;
+    }
+
+    p {
+        font-family: "Poppins";
+        color: var(--light);
+        text-align: center;
+        font-size: 19px;
+        margin-top: 5px;
+    }
+}
