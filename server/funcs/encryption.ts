@@ -52,26 +52,26 @@ export default class Encryption {
         const iv = randomBytes(16);
         const cipher = createCipheriv(
             "aes-256-gcm",
-            Buffer.from(sharedSecret, "base64"),
+            Buffer.from(sharedSecret, "hex"),
             iv
         );
 
-        let encrypted = cipher.update(message, "utf8", "base64");
-        encrypted += cipher.final("base64");
+        let encrypted = cipher.update(message, "utf8", "hex");
+        encrypted += cipher.final("hex");
 
-        return iv.toString("base64") + ":" + encrypted;
+        return iv.toString("hex") + ":" + encrypted;
     }
 
     // Decrypt a message using AES-256
     static decryptMessage(encryptedMessage: string, sharedSecret: string) {
         const [iv, encrypted] = encryptedMessage.split(":");
         const decipher = createDecipheriv(
-            "aes-256-gcm",
-            Buffer.from(sharedSecret, "base64"),
-            Buffer.from(iv, "base64")
+            "aes-256-cbc",
+            Buffer.from(sharedSecret, "hex"),
+            iv
         );
 
-        let decrypted = decipher.update(encrypted, "base64", "utf8");
+        let decrypted = decipher.update(encrypted, 'hex', 'utf8');
         decrypted += decipher.final("utf8");
 
         return decrypted;

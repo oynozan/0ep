@@ -24,7 +24,11 @@ app.use('/api', routes);
 
 /* Socket.io */
 const io = new SocketIOServer(server, {
-    cors: { origin: whitelist }
+    cookie: true,
+    cors: {
+        origin: whitelist,
+        credentials: true
+    }
 });
 
 // Start the Socket listener

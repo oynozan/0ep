@@ -23,8 +23,13 @@ router.put("/", async (req: Request, res: Response) => {
     const token = req.cookies?.["access-token"];
     if (!token) return res.status(400).send({ status: false });
 
+    // Get user via JWT token
     const user = E.decodeJwt(token);
     if (!user?.wallet) return res.status(400).send({ status: false });
+
+    // Check if user exists
+    const duplicateUser = await userDB.findOne({ wallet: user.wallet });
+    if (duplicateUser) return res.status(400).send({ status: false });
 
     // Save user to DB
     const newUser = new userDB({

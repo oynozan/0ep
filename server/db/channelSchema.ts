@@ -1,55 +1,50 @@
-import { model, Schema } from 'mongoose';
-import type { IUser } from './userSchema';
+import { model, Schema } from "mongoose";
 
-type ChannelType = "individual" | "group";
+type ChannelType = "individual" | "group" | "imported";
 
 export interface IMessage {
-    by: Omit<IUser, "verified">;
-    content: string;
+    by: string; // Wallet address
+    message: string;
     date: Date;
 }
 
 export interface IChannel {
     type: ChannelType;
     date: Date;
+    name?: string;
     messages: IMessage[];
-    participants: Array<Omit<IUser, "verified"> & {
-        joinDate: Date;
-        isCreator: boolean;
-        publicKey: string;
-    }>;
-    sharedKeys: Array<{
+    participants: Array<{
         wallet: string;
-        key: string;
+        joinDate: Date;
     }>;
-    privateKey: string;
-    publicKey: string;
+    secret: string;
 }
 
 const channelSchema = new Schema<IChannel>({
     type: String,
     date: Date,
-    participants: [{
-        wallet: String,
-        joinDate: Date,
-        publicKey: String,
-        isCreator: {
-            type: Boolean,
-            default: false,
-        },
-    }],
-    messages: [{
-        by: Object,
-        content: String,
-        date: Date
-    }],
-    sharedKeys: [{
-        wallet: String,
-        key: String
-    }],
-    privateKey: String,
-    publicKey: String,
-})
+    name: String,
+    messages: [
+        new Schema(
+            {
+                by: Object,
+                message: String,
+                date: Date,
+            },
+            { _id: false }
+        ),
+    ],
+    participants: [
+        new Schema(
+            {
+                wallet: String,
+                joinDate: Date,
+            },
+            { _id: false }
+        ),
+    ],
+    secret: String,
+});
 
-const ChannelModel = model('channel', channelSchema);
+const ChannelModel = model("channel", channelSchema);
 export default ChannelModel;

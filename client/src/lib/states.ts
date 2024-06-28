@@ -33,7 +33,7 @@ export const useWalletStore = create<WalletStore>(set => ({
 }));
 
 // Chat States
-type ChatType = "single" | "group" | null;
+type ChatType = "individual" | "group" | "imported" | null;
 type ChatName = string | null;
 type ChatUser = string; // Wallet Address
 
@@ -41,15 +41,15 @@ interface IParticipant {
     username: ChatUser;
 }
 
-interface IMessage {
+export interface IMessage {
     message: string;
-    from: ChatUser;
-    chatID: string;
-    time: Date; // Date that message was sent
+    by: string;
+    date: Date; // Date that message was sent
 }
 
 interface IChat {
     id: string | null;
+    secret: string | null;
     users: Array<IParticipant>; // Chat Participants
     messages: Array<IMessage>;
 }
@@ -57,39 +57,47 @@ interface IChat {
 type EnforceNullFields<T> = T extends { id: null }
     ? {
           type: null;
-          name: null;
+          title: null;
       }
     : {
           type: ChatType;
-          name: ChatName;
+          title: ChatName;
       };
 
 type ChatStoreWithoutSet = IChat & EnforceNullFields<IChat>;
 type ChatStore = ChatStoreWithoutSet & {
     setChat: (chat: ChatStoreWithoutSet) => void;
+    setChatID: (id: string) => void;
 };
 
 export const useChatStore = create<ChatStore>(set => ({
     id: null,
     type: null,
-    name: null,
+    title: null,
+    secret: null,
     users: [],
     messages: [],
     setChat: (chat: ChatStoreWithoutSet) => set(() => ({ ...chat })),
+    setChatID: (id: string) => set(() => ({ id })),
 }));
 
 interface IRoom {
     id: string;
-    key: CryptoKey;
+    type: string;
+    secret: string;
+    title: string;
+    lastMessage?: IMessage;
 }
 
 interface IRooms {
     rooms: IRoom[];
+    setRooms: (rooms: IRoom[]) => void;
     addRoom: (room: IRoom) => void;
 }
 
 export const useRoomsStore = create<IRooms>(set => ({
     rooms: [],
+    setRooms: (rooms: IRoom[]) => set({ rooms }),
     addRoom: (room: IRoom) => set((state: IRooms) => ({
         rooms: [...state.rooms, room]
     }))
@@ -98,8 +106,8 @@ export const useRoomsStore = create<IRooms>(set => ({
 // Filter States
 interface FilterStore {
     search: string;
-    listFilter: "all" | "groups" | "imported";
-    setListFilter: (type: "all" | "groups" | "imported") => void;
+    listFilter: "all" | ChatType;
+    setListFilter: (type: "all" | ChatType) => void;
     setSearch: (search: string) => void;
 }
 

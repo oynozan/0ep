@@ -2,10 +2,12 @@
  * Contains helper methods to be used on Client-side
  */
 
+import * as CryptoJS from "crypto-js";
+
 // A simpler fetch() method
-interface RequestOptions<T extends 'fetch' | 'function'> {
+interface RequestOptions<T extends "fetch" | "function"> {
     method: "POST" | "GET" | "PUT" | "DELETE";
-    body?: T extends 'fetch' ? string : any;
+    body?: T extends "fetch" ? string : any;
     headers?: any;
     credentials?: RequestCredentials | undefined;
 }
@@ -17,7 +19,7 @@ export async function F({
     headers = {},
     extra = {},
     credentials = "include",
-}: RequestOptions<'function'> & {
+}: RequestOptions<"function"> & {
     endpoint: string;
     extra?: any;
     body?: any;
@@ -25,7 +27,7 @@ export async function F({
     return new Promise((resolve, reject) => {
         if (!headers?.["Content-Type"]) headers["Content-Type"] = "application/json";
 
-        const options: RequestOptions<'fetch'> = {
+        const options: RequestOptions<"fetch"> = {
             method,
             headers,
             ...extra,
@@ -36,8 +38,8 @@ export async function F({
 
         fetch(process.env.REACT_APP_API + endpoint, options)
             .then(async res => {
-                if (!res.ok) return reject(await res.json())
-                return await res.json()
+                if (!res.ok) return reject(await res.json());
+                return await res.json();
             })
             .then(res => resolve(res))
             .catch(err => reject(err));
@@ -62,4 +64,55 @@ export function truncateWalletAddress(
     const truncatedAddress = `${prefix}...${suffix}`;
 
     return truncatedAddress;
+}
+
+// Returns color based on given string
+export function stringToColor(str: string): string {
+    let hash = 0;
+    str.split("").forEach(char => {
+        hash = char.charCodeAt(0) + ((hash << 5) - hash);
+    });
+    let colour = "#";
+    for (let i = 0; i < 3; i++) {
+        const value = (hash >> (i * 8)) & 0xff;
+        colour += value.toString(16).padStart(2, "0");
+    }
+
+    return colour;
+}
+
+// Encryption functions
+export function encrypt(message: string, secretKey: string): string {
+    return message;
+
+    const iv = CryptoJS.lib.WordArray.random(16);
+    const encrypted = CryptoJS.AES.encrypt(message, CryptoJS.enc.Hex.parse(secretKey), {
+        iv: iv,
+        mode: CryptoJS.mode.CBC,
+        padding: CryptoJS.pad.Pkcs7,
+    });
+
+    return iv.toString(CryptoJS.enc.Hex) + ":" + encrypted.ciphertext.toString(CryptoJS.enc.Hex);
+}
+
+export function decrypt(ciphertext: string, secretKey: string): string {
+    return ciphertext;
+
+    const [ivHex, encryptedHex] = ciphertext.split(":");
+    const iv = CryptoJS.enc.Hex.parse(ivHex);
+    const encrypted = CryptoJS.enc.Hex.parse(encryptedHex);
+
+    const decrypted = CryptoJS.AES.decrypt(
+        CryptoJS.lib.CipherParams.create({
+            ciphertext: encrypted,
+        }),
+        CryptoJS.enc.Hex.parse(secretKey),
+        {
+            iv: iv,
+            mode: CryptoJS.mode.CBC,
+            padding: CryptoJS.pad.Pkcs7,
+        }
+    );
+
+    return decrypted.toString(CryptoJS.enc.Utf8);
 }

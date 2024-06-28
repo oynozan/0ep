@@ -1,19 +1,20 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { FaChevronLeft } from "react-icons/fa";
+import { FaChevronLeft, FaDiscord } from "react-icons/fa";
 import { IoPerson, IoPeople } from "react-icons/io5";
 import { F } from "../../lib/helpers";
-import ECDH from "../../lib/ecdh";
 import Button from "../Button";
 import "./channel-modal.scss";
+import { useChatStore, useModalStore, useRoomsStore } from '../../lib/states';
 
-type ChatTypes = "individual" | "type";
+type ChatTypes = "individual" | "group" | "imported";
 
 export default function CreateChannelModal() {
     const [type, setType] = useState<ChatTypes | null>(null);
 
     if (type === "individual") return <Individual setType={setType} />;
-    if (type === "type") return <Group setType={setType} />;
+    if (type === "imported") return <Imported setType={setType} />;
+    if (type === "group") return <Group setType={setType} />;
 
     return (
         <div className="methods">
@@ -22,9 +23,13 @@ export default function CreateChannelModal() {
                 <IoPerson />
                 Send message to a person
             </button>
-            <button onClick={() => setType("type")}>
+            <button onClick={() => setType("group")}>
                 <IoPeople />
                 Create a group chat
+            </button>
+            <button onClick={() => setType("imported")}>
+                <FaDiscord />
+                Import a Discord server
             </button>
         </div>
     );
@@ -35,25 +40,38 @@ function Individual({
 }: {
     setType: React.Dispatch<React.SetStateAction<ChatTypes | null>>;
 }) {
+    const rooms = useRoomsStore(s => s.rooms);
+    const addRoom = useRoomsStore(s => s.addRoom);
+    const setModal = useModalStore(s => s.setModal);
+    const setChatID = useChatStore(s => s.setChatID);
+
     const [address, setAddress] = useState("");
 
     async function startConversation(): Promise<any> {
-        if (!address) return toast.error("Please enter a wallet address");
-
-        // Generate ECDH key pair and get public key
-        const ecdh = new ECDH();
-        let { publicKey } = await ecdh.generateKeyPair();
+        if (!address?.trim()) return toast.error("Please enter a wallet address");
 
         F({
             endpoint: "/channel/individual",
             method: "PUT",
             body: {
-                to: address,
-                creatorPublicKey: publicKey,
+                to: address.trim(),
             },
         })
             .then(response => {
-                console.log(response);
+                setModal(null, {});
+
+                for (let room of rooms) {
+                    if (room.id === response.id) {
+                        return setChatID(room.id);
+                    }
+                }
+
+                addRoom({
+                    id: response.id,
+                    type: "individual",
+                    secret: response.key,
+                    title: address.trim()
+                });
             })
             .catch(e => {
                 console.error(e);
@@ -86,7 +104,7 @@ function Group({ setType }: { setType: React.Dispatch<React.SetStateAction<ChatT
     const [groupName, setGroupName] = useState("");
 
     function createGroup(): any {
-        if (!groupName) return toast.error("Please enter a group name");
+        if (!groupName?.trim()) return toast.error("Please enter a group name");
     }
 
     return (
@@ -102,6 +120,70 @@ function Group({ setType }: { setType: React.Dispatch<React.SetStateAction<ChatT
 
             <Button type="main" click={createGroup}>
                 Create Group Chat
+            </Button>
+        </div>
+    );
+}
+
+function Imported({
+    setType,
+}: {
+    setType: React.Dispatch<React.SetStateAction<ChatTypes | null>>;
+}) {
+    const rooms = useRoomsStore(s => s.rooms);
+    const addRoom = useRoomsStore(s => s.addRoom);
+    const setModal = useModalStore(s => s.setModal);
+    const setChatID = useChatStore(s => s.setChatID);
+
+    const [id, setID] = useState("");
+
+    function importServer(): any {
+        if (!id?.trim()) return toast.error("Please enter a group name");
+
+        F({
+            endpoint: "/channel/import",
+            method: "PUT",
+            body: {
+                id: id.trim(),
+            },
+        })
+            .then(response => {
+                setModal(null, {});
+
+                for (let room of rooms) {
+                    if (room.id === response.id) {
+                        return setChatID(room.id);
+                    }
+                }
+
+                console.log(response);
+
+                addRoom({
+                    id: response.id,
+                    type: "imported",
+                    secret: response.key,
+                    title: "DC - " + (response.name)
+                });
+            })
+            .catch(e => {
+                console.error(e);
+                toast.error(e.message);
+            });
+    }
+
+    return (
+        <div className="create-chat group">
+            <div className="top">
+                <h2>Enter Server ID</h2>
+                <button onClick={() => setType(null)}>
+                    <FaChevronLeft />
+                </button>
+            </div>
+
+            <input placeholder="1002292111942635562" onChange={e => setID(e.target.value)} />
+
+            <Button type="main" click={importServer}>
+                Import Discord Server
             </Button>
         </div>
     );

@@ -1,3 +1,7 @@
-import { io } from 'socket.io-client';
-const socket = io(process.env.REACT_APP_API!);
+import { io } from "socket.io-client";
+
+const socket = io(process.env.REACT_APP_SOCKET!, {
+    withCredentials: true,
+});
+
 export default socket;

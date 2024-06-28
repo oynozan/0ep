@@ -3,8 +3,8 @@ import { Route, Routes } from "react-router-dom";
 
 import Cookie from "../lib/cookie";
 import { F } from "../lib/helpers";
-import { Wallet } from '../lib/wallet';
-import { useUserStore, type IUser } from "../lib/states";
+import { Wallet } from "../lib/wallet";
+import { useRoomsStore, useUserStore, type IUser } from "../lib/states";
 
 // Components
 import Login from "../components/Login";
@@ -19,7 +19,9 @@ import Welcome from "./Welcome";
 import "../styles/app.scss";
 
 export default function App() {
+    const user = useUserStore(state => state.user);
     const setUser = useUserStore(state => state.setUser);
+    const setRooms = useRoomsStore(state => state.setRooms);
 
     const [userExists, setUserExists] = useState(true);
 
@@ -46,7 +48,7 @@ export default function App() {
                 setUser(res);
 
                 // Connect the wallet
-                const wallet = new Wallet('keplr');
+                const wallet = new Wallet("keplr");
                 const connectResponse = await wallet.connect();
 
                 // If wallet is invalid, user needs to login again
@@ -69,6 +71,18 @@ export default function App() {
                 setUserExists(false);
             });
     }, []);
+
+    useEffect(() => {
+        if (user && user?.verified) {
+            // Get chat rooms
+            F({
+                endpoint: "/channel/rooms",
+                method: "GET",
+            }).then(response => {
+                setRooms(response.rooms);
+            });
+        }
+    }, [user]);
 
     return (
         <>
