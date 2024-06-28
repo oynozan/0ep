@@ -3,24 +3,37 @@
  */
 
 import { create } from "zustand";
+import { Wallet, type IWallet } from "./wallet";
 
 // User States
 export interface IUser {
     wallet: string;
+    verified: boolean;
 }
 
 interface UserStore {
     user: IUser | null;
-    setUser: (user: IUser) => void
+    setUser: (user: IUser | null) => void;
 }
 
 export const useUserStore = create<UserStore>(set => ({
     user: null,
-    setUser: (user: IUser) => set(() => ({ user }))
+    setUser: (user: IUser | null) => set(() => ({ user })),
+}));
+
+// Wallet State
+interface WalletStore {
+    wallet: IWallet;
+    setWallet: (wallet: IWallet) => void;
+}
+
+export const useWalletStore = create<WalletStore>(set => ({
+    wallet: new Wallet("keplr"), // Keplr is the default wallet for now
+    setWallet: (wallet: IWallet) => set(() => ({ wallet })),
 }));
 
 // Chat States
-type ChatType = "single" | "group" | null;
+type ChatType = "individual" | "group" | "imported" | null;
 type ChatName = string | null;
 type ChatUser = string; // Wallet Address
 
@@ -28,15 +41,15 @@ interface IParticipant {
     username: ChatUser;
 }
 
-interface IMessage {
+export interface IMessage {
     message: string;
-    from: ChatUser;
-    chatID: string;
-    time: Date; // Date that message was sent
+    by: string;
+    date: Date; // Date that message was sent
 }
 
 interface IChat {
     id: string | null;
+    secret: string | null;
     users: Array<IParticipant>; // Chat Participants
     messages: Array<IMessage>;
 }
@@ -44,32 +57,57 @@ interface IChat {
 type EnforceNullFields<T> = T extends { id: null }
     ? {
           type: null;
-          name: null;
+          title: null;
       }
     : {
           type: ChatType;
-          name: ChatName;
+          title: ChatName;
       };
 
 type ChatStoreWithoutSet = IChat & EnforceNullFields<IChat>;
 type ChatStore = ChatStoreWithoutSet & {
     setChat: (chat: ChatStoreWithoutSet) => void;
+    setChatID: (id: string) => void;
 };
 
 export const useChatStore = create<ChatStore>(set => ({
     id: null,
     type: null,
-    name: null,
+    title: null,
+    secret: null,
     users: [],
     messages: [],
-    setChat: (chat: ChatStoreWithoutSet) => set(() => ({ ...chat }))
+    setChat: (chat: ChatStoreWithoutSet) => set(() => ({ ...chat })),
+    setChatID: (id: string) => set(() => ({ id })),
 }));
 
-// Filters
+interface IRoom {
+    id: string;
+    type: string;
+    secret: string;
+    title: string;
+    lastMessage?: IMessage;
+}
+
+interface IRooms {
+    rooms: IRoom[];
+    setRooms: (rooms: IRoom[]) => void;
+    addRoom: (room: IRoom) => void;
+}
+
+export const useRoomsStore = create<IRooms>(set => ({
+    rooms: [],
+    setRooms: (rooms: IRoom[]) => set({ rooms }),
+    addRoom: (room: IRoom) => set((state: IRooms) => ({
+        rooms: [...state.rooms, room]
+    }))
+}))
+
+// Filter States
 interface FilterStore {
     search: string;
-    listFilter: "all" | "groups" | "imported";
-    setListFilter: (type: "all" | "groups" | "imported") => void;
+    listFilter: "all" | ChatType;
+    setListFilter: (type: "all" | ChatType) => void;
     setSearch: (search: string) => void;
 }
 

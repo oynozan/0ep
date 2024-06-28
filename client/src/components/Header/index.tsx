@@ -12,8 +12,8 @@ export default function Header() {
 
     return (
         <header>
-            { chat?.name ? (
-                <p>{chat.name}</p>
+            { chat?.title ? (
+                <p>{chat.title}</p>
             ) : (
                 <p>0ep Protocol - A new era in communication</p>
             )}

@@ -1,8 +1,12 @@
 import { useState } from "react";
+import { Link } from 'react-router-dom';
 
 import Button from "../Button";
 import Tooltip from "../Tooltip";
-import { useFilterStore } from "../../lib/states";
+import ChannelPicture from '../Channels/ChannelPicture';
+import { decrypt, truncateWalletAddress } from '../../lib/helpers';
+import CreateChannelModal from '../Channels/CreateChannelModal';
+import { useFilterStore, useModalStore, useRoomsStore } from "../../lib/states";
 
 // Icons
 import { HiMiniMagnifyingGlass } from "react-icons/hi2";
@@ -11,10 +15,13 @@ import { FaCirclePlus, FaGear, FaUserSecret } from "react-icons/fa6";
 import "./sidebar.scss";
 
 export default function Sidebar() {
-    const [tooltip, setTooltip] = useState<string | null>(null);
-
+    const rooms = useRoomsStore(state => state.rooms);
+    const setModal = useModalStore(state => state.setModal);
+    const search = useFilterStore(state => state.search);
     const filter = useFilterStore(state => state.listFilter);
     const setFilter = useFilterStore(state => state.setListFilter);
+
+    const [tooltip, setTooltip] = useState<string | null>(null);
 
     return (
         <nav id="sidebar">
@@ -27,7 +34,7 @@ export default function Sidebar() {
                         onMouseLeave={() => setTooltip(null)}
                         onMouseEnter={() => setTooltip("anonymous")}
                     >
-                        <FaUserSecret color="rgb(76, 77, 78)" />
+                        <FaUserSecret color="rgba(120, 120, 120, .7)" />
                         <Tooltip position="right" visibility={tooltip === "anonymous"}>
                             Max-Stealth Mode
                             <small>(Coming Soon)</small>
@@ -39,7 +46,7 @@ export default function Sidebar() {
                         onMouseLeave={() => setTooltip(null)}
                         onMouseEnter={() => setTooltip("settings")}
                     >
-                        <FaGear color="rgb(76, 77, 78)" />
+                        <FaGear color="rgba(120, 120, 120, .7)" />
                         <Tooltip position="right" visibility={tooltip === "settings"}>
                             Settings
                         </Tooltip>
@@ -66,8 +73,8 @@ export default function Sidebar() {
                             All
                         </div>
                         <div
-                            className={filter === "groups" ? "active" : undefined}
-                            onClick={() => setFilter("groups")}
+                            className={filter === "group" ? "active" : undefined}
+                            onClick={() => setFilter("group")}
                         >
                             Groups
                         </div>
@@ -80,11 +87,50 @@ export default function Sidebar() {
                     </div>
                 </div>
 
-                <div className="chats"></div>
+                <div className="rooms">
+                    {!rooms?.length && <p className="no-room">There are no chat rooms.</p>}
+                    {rooms.map((r, i) => {
+                        if (filter && r.type !== filter && filter !== "all") return <></>;
+                        if (search && !r.title.includes(search)) return <></>;
 
-                <div className="add">
+                        // Room ID is the receiver's wallet address OR group name
+                        let title = r.title;
+                        if (!title) return <></>;
+                        if (r.title.startsWith("nibi")) title = truncateWalletAddress(title);
+
+                        // Decrypt the last sent message, then show it on room link
+                        const encryptedLastMessage = r.lastMessage?.message;
+                        let decryptedLastMessage = "";
+                        if (encryptedLastMessage) {
+                            // decryptedLastMessage = decrypt(encryptedLastMessage, r.secret);
+                            decryptedLastMessage = encryptedLastMessage;
+                        }
+
+                        return (
+                            <Link
+                                key={i}
+                                to={`/c/${r.id}`}
+                                className="room"
+                            >
+                                <ChannelPicture id={r.id} size={50} />
+                                <div className="room-info">
+                                    <h5>{title}</h5>
+                                    <p>{decryptedLastMessage || <span>No messages yet</span>}</p>
+                                </div>
+                            </Link>
+                        )
+                    })}
+                </div>
+
+                <div
+                    className="add"
+                    onClick={() => setModal("custom", {
+                        content: <CreateChannelModal />,
+                        customID: "dynamic-size"
+                    })}
+                >
                     <FaCirclePlus />
-                    <p>Add or import a channel</p>
+                    <p>Create or import a channel</p>
                 </div>
             </div>
         </nav>

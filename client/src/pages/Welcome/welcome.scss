@@ -6,7 +6,6 @@
     height: 100%;
     width: 100%;
     background-image: url("../../../public/images/background.svg");
-    box-shadow: inset 0 0 140px 60px var(--dark);
     border-radius: 100px;
 
     img {
@@ -19,8 +18,9 @@
         font-size: 65px;
         text-align: center;
         -webkit-text-fill-color: #0000;
-        background: -webkit-linear-gradient(270deg, var(--light) 20%, var(--second));
+        background: -webkit-linear-gradient(270deg, rgb(229, 152, 245) 20%, var(--second));
         -webkit-background-clip: text;
+        background-clip: text;
     }
 
     p {

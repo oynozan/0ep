@@ -19,4 +19,8 @@ export default class Cookie {
         }
         return null;
     }
+
+    static erase(name: string) {
+        document.cookie = name + '=; Max-Age=-99999999;';
+    }
 }

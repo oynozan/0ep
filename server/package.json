@@ -1,0 +1,40 @@
+{
+  "name": "0ep-server",
+  "version": "1.0.0",
+  "description": "0ep Protocol - Backend",
+  "main": "dist/main.js",
+  "scripts": {
+    "start": "tsc && node dist/main.js",
+    "dev": "ts-node-dev main.ts",
+    "pm2": "pm2 start dist/main.js --exp-backoff-restart-delay=100"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oynozan/0ep.git"
+  },
+  "author": "oynozan",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.7",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/node": "^20.14.8",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0"
+  },
+  "dependencies": {
+    "@cosmjs/encoding": "^0.32.3",
+    "@keplr-wallet/cosmos": "^0.12.105",
+    "@types/express": "^4.17.21",
+    "@types/socket.io": "^3.0.2",
+    "axios": "^1.7.2",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.4.3",
+    "socket.io": "^4.7.5",
+    "typescript": "^5.5.2",
+    "web3": "^4.10.0"
+  }
+}

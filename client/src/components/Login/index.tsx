@@ -9,27 +9,22 @@
 
 import { useEffect, useState } from "react";
 
-import { useModalStore } from "../../lib/states";
+import { useModalStore, useUserStore } from "../../lib/states";
+import { F } from '../../lib/helpers';
 
 // Modals
+import VerificationModal from './Modals/Verification';
+import LoadingModal from './Modals/Loading';
 import WelcomeModal from "./Modals/Welcome";
 import WalletModal from "./Modals/Wallet";
 
 import './login.scss';
 
 export default function Login() {
+    const user = useUserStore(state => state.user);
     const setModal = useModalStore(state => state.setModal);
 
-    const [step, setStep] = useState(-1);
-
-    useEffect(() => {
-        // Check if user has seen 0th step
-        if (localStorage.getItem("SKIP-WELCOME-BEFORE-LOGIN")) setStep(1);
-        else {
-            // localStorage.setItem("SKIP-WELCOME-BEFORE-LOGIN", "1");
-            setStep(0);
-        }
-    }, []);
+    const [step, setStep] = useState(0);
 
     // Set corresponding modal
     useEffect(() => {
@@ -41,15 +36,24 @@ export default function Login() {
                 break;
 
             case 1:
-                content = <WalletModal next={() => setStep(2)} />;
+                content = <WalletModal next={(s: number = 0) => setStep(2 + s)} />;
                 break;
 
-            default:
-                return;
+            case 2:
+                content = <VerificationModal next={() => setStep(3)} first={() => setStep(0)} />
+                break;
+
+            case 3:
+                return setModal(null, {});
         }
 
         setModal("login", { content });
     }, [step]);
+
+    useEffect(() => {
+        // User exists but must verify the account
+        if (user?.wallet && !user?.verified) setStep(2);
+    }, [user]);
 
     return null;
 }
