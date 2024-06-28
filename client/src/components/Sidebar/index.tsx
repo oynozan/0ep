@@ -2,7 +2,8 @@ import { useState } from "react";
 
 import Button from "../Button";
 import Tooltip from "../Tooltip";
-import { useFilterStore } from "../../lib/states";
+import CreateChannelModal from '../Channels/CreateChannelModal';
+import { useFilterStore, useModalStore } from "../../lib/states";
 
 // Icons
 import { HiMiniMagnifyingGlass } from "react-icons/hi2";
@@ -11,10 +12,11 @@ import { FaCirclePlus, FaGear, FaUserSecret } from "react-icons/fa6";
 import "./sidebar.scss";
 
 export default function Sidebar() {
-    const [tooltip, setTooltip] = useState<string | null>(null);
-
+    const setModal = useModalStore(state => state.setModal);
     const filter = useFilterStore(state => state.listFilter);
     const setFilter = useFilterStore(state => state.setListFilter);
+
+    const [tooltip, setTooltip] = useState<string | null>(null);
 
     return (
         <nav id="sidebar">
@@ -27,7 +29,7 @@ export default function Sidebar() {
                         onMouseLeave={() => setTooltip(null)}
                         onMouseEnter={() => setTooltip("anonymous")}
                     >
-                        <FaUserSecret color="rgb(76, 77, 78)" />
+                        <FaUserSecret color="rgba(120, 120, 120, .7)" />
                         <Tooltip position="right" visibility={tooltip === "anonymous"}>
                             Max-Stealth Mode
                             <small>(Coming Soon)</small>
@@ -39,7 +41,7 @@ export default function Sidebar() {
                         onMouseLeave={() => setTooltip(null)}
                         onMouseEnter={() => setTooltip("settings")}
                     >
-                        <FaGear color="rgb(76, 77, 78)" />
+                        <FaGear color="rgba(120, 120, 120, .7)" />
                         <Tooltip position="right" visibility={tooltip === "settings"}>
                             Settings
                         </Tooltip>
@@ -82,9 +84,15 @@ export default function Sidebar() {
 
                 <div className="chats"></div>
 
-                <div className="add">
+                <div
+                    className="add"
+                    onClick={() => setModal("custom", {
+                        content: <CreateChannelModal />,
+                        customID: "dynamic-size"
+                    })}
+                >
                     <FaCirclePlus />
-                    <p>Add or import a channel</p>
+                    <p>Create or import a channel</p>
                 </div>
             </div>
         </nav>

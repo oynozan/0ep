@@ -3,20 +3,33 @@
  */
 
 import { create } from "zustand";
+import { Wallet, type IWallet } from "./wallet";
 
 // User States
 export interface IUser {
     wallet: string;
+    verified: boolean;
 }
 
 interface UserStore {
     user: IUser | null;
-    setUser: (user: IUser) => void
+    setUser: (user: IUser | null) => void;
 }
 
 export const useUserStore = create<UserStore>(set => ({
     user: null,
-    setUser: (user: IUser) => set(() => ({ user }))
+    setUser: (user: IUser | null) => set(() => ({ user })),
+}));
+
+// Wallet State
+interface WalletStore {
+    wallet: IWallet;
+    setWallet: (wallet: IWallet) => void;
+}
+
+export const useWalletStore = create<WalletStore>(set => ({
+    wallet: new Wallet("keplr"), // Keplr is the default wallet for now
+    setWallet: (wallet: IWallet) => set(() => ({ wallet })),
 }));
 
 // Chat States
@@ -62,10 +75,27 @@ export const useChatStore = create<ChatStore>(set => ({
     name: null,
     users: [],
     messages: [],
-    setChat: (chat: ChatStoreWithoutSet) => set(() => ({ ...chat }))
+    setChat: (chat: ChatStoreWithoutSet) => set(() => ({ ...chat })),
 }));
 
-// Filters
+interface IRoom {
+    id: string;
+    key: CryptoKey;
+}
+
+interface IRooms {
+    rooms: IRoom[];
+    addRoom: (room: IRoom) => void;
+}
+
+export const useRoomsStore = create<IRooms>(set => ({
+    rooms: [],
+    addRoom: (room: IRoom) => set((state: IRooms) => ({
+        rooms: [...state.rooms, room]
+    }))
+}))
+
+// Filter States
 interface FilterStore {
     search: string;
     listFilter: "all" | "groups" | "imported";

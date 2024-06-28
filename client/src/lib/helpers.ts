@@ -3,9 +3,9 @@
  */
 
 // A simpler fetch() method
-interface RequestOptions {
+interface RequestOptions<T extends 'fetch' | 'function'> {
     method: "POST" | "GET" | "PUT" | "DELETE";
-    body?: string;
+    body?: T extends 'fetch' ? string : any;
     headers?: any;
     credentials?: RequestCredentials | undefined;
 }
@@ -17,15 +17,15 @@ export async function F({
     headers = {},
     extra = {},
     credentials = "include",
-}: RequestOptions & {
+}: RequestOptions<'function'> & {
     endpoint: string;
     extra?: any;
     body?: any;
-}) {
+}): Promise<any> {
     return new Promise((resolve, reject) => {
         if (!headers?.["Content-Type"]) headers["Content-Type"] = "application/json";
 
-        const options: RequestOptions = {
+        const options: RequestOptions<'fetch'> = {
             method,
             headers,
             ...extra,
@@ -35,7 +35,10 @@ export async function F({
         if (credentials) options["credentials"] = "include";
 
         fetch(process.env.REACT_APP_API + endpoint, options)
-            .then(res => res.json())
+            .then(async res => {
+                if (!res.ok) return reject(await res.json())
+                return await res.json()
+            })
             .then(res => resolve(res))
             .catch(err => reject(err));
     });

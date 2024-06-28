@@ -8,11 +8,10 @@
     --second: #6e38f7;
     --second-10: rgba(110, 56, 247, 0.1);
 
-    --dark: rgb(41, 44, 46);
-    --darker: rgb(29, 31, 32);
-    --gray: rgb(54, 54, 58);
-    --gray2: rgb(52, 52, 56);
-    --l-gray: rgb(76, 77, 78);
+    --dark: rgb(20, 19, 24);
+    --gray: rgb(50, 48, 54);
+    --gray2:rgb(39, 37, 42);
+    --l-gray: rgb(86, 85, 88);
 
     --green: rgb(197, 255, 74);
 }
@@ -64,10 +63,18 @@ a {
     }
 }
 
+button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
 input,
 textarea,
 button {
     font-family: "Poppins";
+    background: transparent;
     border: none;
     outline: none;
     transition: 200ms;

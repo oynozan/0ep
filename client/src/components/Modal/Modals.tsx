@@ -15,14 +15,19 @@ export default function Modals() {
     );
 
     const [selected, setSelected] = useState<string | null>(null);
+    const [delayedOptions, setDelayedOptions] = useState<any>({});
 
+    // Putting a delay before changing selected modal to global state's value
+    // The reason is to put a closing animation before removing modal component
     useEffect(() => {
-        // Putting a delay before changing selected modal to global state's value
-        // The reason is to put a closing animation before removing modal component
         setTimeout(() => {
             setSelected(selectedModal);
-        }, 249);
-    }, [selectedModal]);
+        }, 250);
+
+        setTimeout(() => {
+            setDelayedOptions(options);
+        }, 250);
+    }, [selectedModal, options]);
 
     return (
         <>
@@ -31,8 +36,9 @@ export default function Modals() {
                 <Modal
                     set={setModal}
                     closing={selected !== selectedModal}
+                    customID={delayedOptions?.customID}
                 >
-                    {options.content}
+                    {delayedOptions.content}
                 </Modal>
             )}
 
@@ -44,7 +50,7 @@ export default function Modals() {
                     closing={selected !== selectedModal}
                     customID="login-modal"
                 >
-                    {options.content}
+                    {delayedOptions.content}
                 </Modal>
             )}
         </>
