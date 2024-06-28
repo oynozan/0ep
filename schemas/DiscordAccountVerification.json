@@ -1,0 +1,34 @@
+{
+    "category": "Social",
+    "issuer": "Discord",
+    "desc": "App for creating communities with voice, video, and text communication channels.",
+    "website": "https://discord.com/channels/@me",
+    "breakWall": true,
+    "APIs": [
+        {
+            "host": "discord.com",
+            "intercept": {
+                "url": "api/v9/user-profile-effects",
+                "method": "GET"
+            },
+            "override": {
+                "url": "api/v9/users/@me"
+            },
+            "assert": [
+                {
+                    "key": "verified",
+                    "value": "true",
+                    "operation": "="
+                }
+            ],
+            "nullifier": "id"
+        }
+    ],
+    "HRCondition": [
+        "After you sign in, click on your profile picture and start the verification."
+    ],
+    "tips": {
+        "message": "When you successfully log in, please click the 'Start' button to initiate the verification process."
+    },
+    "id": "0x7e5867ab655a433284d3c144a1e927b7"
+}
