@@ -13,7 +13,7 @@ const app: Application = express();
 const server = require("http").createServer(app);
 
 /* Middlewares */
-const whitelist = ["https://0ep.net"];
+const whitelist = ["https://api.0ep.net"];
 if (process.env.NODE_ENV == "development")
     whitelist.push("http://localhost:3000");
 
