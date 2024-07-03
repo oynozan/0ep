@@ -38,7 +38,7 @@ type ChatName = string | null;
 type ChatUser = string; // Wallet Address
 
 interface IParticipant {
-    username: ChatUser;
+    wallet: ChatUser;
 }
 
 export interface IMessage {
@@ -52,6 +52,7 @@ interface IChat {
     secret: string | null;
     users: Array<IParticipant>; // Chat Participants
     messages: Array<IMessage>;
+    read: { [wallet: string]: Date };
 }
 
 type EnforceNullFields<T> = T extends { id: null }
@@ -68,6 +69,7 @@ type ChatStoreWithoutSet = IChat & EnforceNullFields<IChat>;
 type ChatStore = ChatStoreWithoutSet & {
     setChat: (chat: ChatStoreWithoutSet) => void;
     setChatID: (id: string) => void;
+    resetChat: () => void;
 };
 
 export const useChatStore = create<ChatStore>(set => ({
@@ -77,8 +79,18 @@ export const useChatStore = create<ChatStore>(set => ({
     secret: null,
     users: [],
     messages: [],
+    read: {},
     setChat: (chat: ChatStoreWithoutSet) => set(() => ({ ...chat })),
     setChatID: (id: string) => set(() => ({ id })),
+    resetChat: () =>
+        set(() => ({
+            id: null,
+            type: null,
+            title: null,
+            secret: null,
+            users: [],
+            messages: [],
+        })),
 }));
 
 interface IRoom {
@@ -98,10 +110,11 @@ interface IRooms {
 export const useRoomsStore = create<IRooms>(set => ({
     rooms: [],
     setRooms: (rooms: IRoom[]) => set({ rooms }),
-    addRoom: (room: IRoom) => set((state: IRooms) => ({
-        rooms: [...state.rooms, room]
-    }))
-}))
+    addRoom: (room: IRoom) =>
+        set((state: IRooms) => ({
+            rooms: [...state.rooms, room],
+        })),
+}));
 
 // Filter States
 interface FilterStore {

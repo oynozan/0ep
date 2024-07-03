@@ -81,6 +81,23 @@ export function stringToColor(str: string): string {
     return colour;
 }
 
+// Date functions
+export function HHMM(date: Date | number): string {
+    if (typeof date === "number") date = new Date(date);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+}
+
+export function MMDDHHMM(date: Date | number): string {
+    if (typeof date === "number") date = new Date(date);
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${month}.${day} ${hours}:${minutes}`;
+}
+
 // Encryption functions
 export function encrypt(message: string, secretKey: string): string {
     return message;

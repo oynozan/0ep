@@ -3,12 +3,14 @@ import { Link } from 'react-router-dom';
 
 import Button from "../Button";
 import Tooltip from "../Tooltip";
+import Cookie from '../../lib/cookie';
 import ChannelPicture from '../Channels/ChannelPicture';
-import { decrypt, truncateWalletAddress } from '../../lib/helpers';
 import CreateChannelModal from '../Channels/CreateChannelModal';
-import { useFilterStore, useModalStore, useRoomsStore } from "../../lib/states";
+import { decrypt, truncateWalletAddress } from '../../lib/helpers';
+import { useChatStore, useFilterStore, useModalStore, useRoomsStore } from "../../lib/states";
 
 // Icons
+import { CgLogOut } from "react-icons/cg";
 import { HiMiniMagnifyingGlass } from "react-icons/hi2";
 import { FaCirclePlus, FaGear, FaUserSecret } from "react-icons/fa6";
 
@@ -16,6 +18,7 @@ import "./sidebar.scss";
 
 export default function Sidebar() {
     const rooms = useRoomsStore(state => state.rooms);
+    const chatTitle = useChatStore(state => state.title);
     const setModal = useModalStore(state => state.setModal);
     const search = useFilterStore(state => state.search);
     const filter = useFilterStore(state => state.listFilter);
@@ -23,11 +26,19 @@ export default function Sidebar() {
 
     const [tooltip, setTooltip] = useState<string | null>(null);
 
+    function logout() {
+        Cookie.erase("access-token");
+        Cookie.erase("logged");
+        window.location.reload();
+    }
+
     return (
         <nav id="sidebar">
             {/* Settings & Profile Picture */}
             <div className="left">
-                <div className="profile"></div>
+                <div className="logo">
+                    <img src="/images/logo.svg" />
+                </div>
                 <div className="settings">
                     <Button
                         type="blank"
@@ -41,14 +52,26 @@ export default function Sidebar() {
                         </Tooltip>
                     </Button>
 
-                    <Button
-                        type="blank"
+                    <Link
+                        to="/settings"
                         onMouseLeave={() => setTooltip(null)}
                         onMouseEnter={() => setTooltip("settings")}
                     >
                         <FaGear color="rgba(120, 120, 120, .7)" />
                         <Tooltip position="right" visibility={tooltip === "settings"}>
                             Settings
+                        </Tooltip>
+                    </Link>
+
+                    <Button
+                        type="blank"
+                        click={logout}
+                        onMouseLeave={() => setTooltip(null)}
+                        onMouseEnter={() => setTooltip("logout")}
+                    >
+                        <CgLogOut color="rgba(120, 120, 120, .7)" />
+                        <Tooltip position="right" visibility={tooltip === "logout"}>
+                            Logout
                         </Tooltip>
                     </Button>
                 </div>
@@ -106,17 +129,34 @@ export default function Sidebar() {
                             decryptedLastMessage = encryptedLastMessage;
                         }
 
-                        return (
-                            <Link
-                                key={i}
-                                to={`/c/${r.id}`}
-                                className="room"
-                            >
+                        const isCurrentRoom = r.title === chatTitle;
+
+                        const RoomContent = () => (
+                            <>
                                 <ChannelPicture id={r.id} size={50} />
                                 <div className="room-info">
                                     <h5>{title}</h5>
                                     <p>{decryptedLastMessage || <span>No messages yet</span>}</p>
                                 </div>
+                            </>
+                        )
+
+                        if (isCurrentRoom) return (
+                            <div
+                                key={i}
+                                className='room current'
+                            >
+                                <RoomContent />
+                            </div>
+                        )
+
+                        return (
+                            <Link
+                                key={i}
+                                to={`/c/${r.id}`}
+                                className={"room " + (isCurrentRoom ? "current" : "")}
+                            >
+                                <RoomContent />
                             </Link>
                         )
                     })}

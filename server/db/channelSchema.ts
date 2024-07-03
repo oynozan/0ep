@@ -17,6 +17,8 @@ export interface IChannel {
         wallet: string;
         joinDate: Date;
     }>;
+    // Holds data of last read message's date by user
+    read?: { [wallet: string]: Date };
     secret: string;
 }
 
@@ -43,6 +45,7 @@ const channelSchema = new Schema<IChannel>({
             { _id: false }
         ),
     ],
+    read: {},
     secret: String,
 });
 

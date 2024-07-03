@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 
 import Cookie from "../lib/cookie";
 import { F } from "../lib/helpers";
 import { Wallet } from "../lib/wallet";
-import { useRoomsStore, useUserStore, type IUser } from "../lib/states";
+import { useChatStore, useRoomsStore, useUserStore, type IUser } from "../lib/states";
 
 // Components
 import Login from "../components/Login";
@@ -19,9 +19,12 @@ import Welcome from "./Welcome";
 import "../styles/app.scss";
 
 export default function App() {
+    const pathname = useLocation().pathname;
+
     const user = useUserStore(state => state.user);
     const setUser = useUserStore(state => state.setUser);
     const setRooms = useRoomsStore(state => state.setRooms);
+    const resetChat = useChatStore(state => state.resetChat);
 
     const [userExists, setUserExists] = useState(true);
 
@@ -83,6 +86,11 @@ export default function App() {
             });
         }
     }, [user]);
+
+    useEffect(() => {
+        // If user is at another page, reset chat data
+        if (!pathname.startsWith("/c/")) resetChat();
+    }, [pathname])
 
     return (
         <>

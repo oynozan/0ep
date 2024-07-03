@@ -263,6 +263,8 @@ router.get("/room", E.verified, async (req: UserRequest, res: Response) => {
             },
         ]);
 
+        console.log(chat);
+
         if (!chat?.length)
             return res.status(400).send({ message: "Chat cannot be found" });
 

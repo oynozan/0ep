@@ -14,6 +14,7 @@ async function getChatUser(socket: Socket, id: string, secretKey: string): Promi
     if (!token) return false;
 
     const decodedUser = Encryption.decodeJwt(token);
+    console.log(decodedUser);
 
     // Be sure user has access to the room
     const isParticipant = await channelDB.countDocuments({
@@ -28,6 +29,18 @@ async function getChatUser(socket: Socket, id: string, secretKey: string): Promi
     return false;
 }
 
+async function setReadMessage(wallet: string, secretKey: string): Promise<void> {
+    const chatType = (await channelDB.findOne({ secret: secretKey }, { type: 1 }))?.type;
+    if (chatType === "imported" || !chatType) return; // There's no read data in imported chats
+
+    const readKey = `read.${wallet}`;
+    const readObj: any = {};
+    readObj[readKey] = new Date();
+
+    await channelDB.updateOne({ secret: secretKey }, readObj);
+    return;
+}
+
 export default function(io: SocketIOServer) {
     io.on("connection", socket => {
         socket.on('join-room', async ({ id, secretKey }) => {
@@ -36,8 +49,10 @@ export default function(io: SocketIOServer) {
 
             if (!user) return socket.emit("join-room-response", {
                 success: false,
-                message: "You're not a attendee of this chat!"
+                message: "You're not an attendee of this chat!"
             });
+
+            await setReadMessage(user.wallet, secretKey);
 
             socket.join(id);
             socket.emit("join-room-response", { success: true });
@@ -49,7 +64,7 @@ export default function(io: SocketIOServer) {
 
             if (!user) return socket.emit("message-response", {
                 success: false,
-                message: "You're not a attendee of this chat!"
+                message: "You're not an attendee of this chat!"
             });
 
             message = message.trim();
@@ -88,6 +103,16 @@ export default function(io: SocketIOServer) {
                     message: "An error has occured."
                 });
             }
+        });
+
+        socket.on("update-read", async ({ id, secretKey }) => {
+            if (!secretKey || !id) return;
+            const user = await getChatUser(socket, id, secretKey);
+
+            await setReadMessage(user.wallet, secretKey);
+
+            // Send which user has updated read data
+            io.to(id).emit("read-data", { wallet: user.wallet });
         });
     })
 }

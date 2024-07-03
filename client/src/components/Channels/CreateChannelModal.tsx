@@ -156,13 +156,11 @@ function Imported({
                     }
                 }
 
-                console.log(response);
-
                 addRoom({
                     id: response.id,
                     type: "imported",
                     secret: response.key,
-                    title: "DC - " + (response.name)
+                    title: response.name
                 });
             })
             .catch(e => {

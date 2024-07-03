@@ -9,19 +9,23 @@
         flex-direction: column;
         justify-content: space-between;
         align-items: center;
-        padding: 20px 0;
+        padding: 15px 0 20px 0;
         height: 100dvh;
         width: 70px;
         background: var(--gray2);
         z-index: 2;
         box-shadow: inset 2px 0 10px 2px #00000020;
 
+        .logo img {
+            height: 50px;
+        }
+
         .settings {
             display: flex;
             flex-direction: column;
             gap: 40px;
 
-            button {
+            button, a {
                 position: relative;
                 height: 30px;
 
@@ -54,7 +58,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 15px;
+            padding: 15px 15px 0 15px;
     
             .search-bar {
                 display: flex;
@@ -116,6 +120,7 @@
     
         .rooms {
             flex: 1;
+            overflow-y: auto;
 
             .no-room {
                 display: flex;
@@ -136,6 +141,11 @@
 
                 &:hover {
                     background: rgba(255, 255, 255, .1);
+                }
+
+                &.current {
+                    background: rgba(255, 255, 255, 0.064);
+                    cursor: default;
                 }
 
                 &-info {
@@ -166,6 +176,17 @@
                     }
                 }
             }
+
+            &::-webkit-scrollbar-track {
+                background: var(--gray);
+            }
+            &::-webkit-scrollbar-thumb {
+                background: var(--gray2);
+            }
+            &::-webkit-scrollbar-thumb:hover {
+                background: rgb(33, 31, 35);
+            }
+            
         }
     
         .add {
@@ -177,7 +198,6 @@
             color: #ffffff90;
             font-size: 18px;
             transition: 250ms;
-            box-shadow: inset 0 0 10px 2px #00000020;
             cursor: pointer;
     
             &:hover {

@@ -11,36 +11,54 @@
     .messages {
         display: flex;
         flex-direction: column;
-        gap: 40px;
-        padding: 20px;
+        padding: 20px 40px;
         overflow-y: auto;
 
         .message {
             display: flex;
             flex-direction: row;
             gap: 10px;
+            margin-top: 40px;
+
+            &:first-child {
+                margin-top: 0;
+            }
 
             .content {
                 max-width: 80%;
                 display: flex;
                 align-items: flex-start;
                 gap: 10px;
+            }
 
-                .message-info {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 10px;
-                    margin-top: 10px;
-                }
-    
-                p {
-                    font-weight: 500;
-                    color: var(--gray2);
-                    background-color: #d0b2e3;
-                    padding: 10px;
-                    border-radius: 0 12px 12px 12px;
-                    min-width: 200px;
-                }
+            .message-info {
+                position: relative;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            p {
+                font-weight: 500;
+                font-size: 18px;
+                color: var(--gray2);
+                background-color: #d0b2e3;
+                padding: 7px 20px 20px 7px;
+                border-radius: 0 12px 12px 12px;
+                min-width: 200px;
+            }
+
+            .message-details {
+                position: absolute;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                right: 3px;
+                bottom: 3px;
+                padding: 0 4px 2px 0;
+                font-size: 13px;
+                font-weight: 500;
+                color: rgba(120, 35, 135, 0.66);
             }
 
             &.me {
@@ -52,14 +70,34 @@
 
                     .message-info {
                         align-items: flex-end;
-
-                        p {
-                            background-color: var(--second);
-                            color: var(--light);
-                            border-radius: 12px 0 12px 12px;
-                            text-align: end;
-                        }
                     }
+                }
+
+                p {
+                    background-color: var(--second);
+                    color: var(--light);
+                    border-radius: 12px 0 12px 12px;
+                    text-align: end;
+                }
+
+                .message-details {
+                    width: 100%;
+                    justify-content: flex-start;
+                    padding-left: 10px;
+                    color: rgba(255, 255, 255, 0.3);
+                }
+            }
+
+            &.single-message {
+                padding-left: 50px;
+                margin-top: 10px;
+
+                &.me {
+                    padding-right: 50px;
+                }
+
+                p {
+                    border-radius: 12px;
                 }
             }
         }
