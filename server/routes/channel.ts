@@ -15,82 +15,127 @@ const router = Router();
  * Create an individual chat
  */
 router.put("/individual", E.verified, async (req: UserRequest, res: Response) => {
-        try {
-            const { to }: { to: string } = req.body;
+    try {
+        const { to }: { to: string } = req.body;
 
-            if (!to)
-                return res
-                    .status(400)
-                    .send({ message: "Please enter a valid wallet address." });
+        if (!to)
+            return res
+                .status(400)
+                .send({ message: "Please enter a valid wallet address." });
 
-            const toUser = await userDB.findOne({ wallet: to }, { wallet: 1 });
-            if (!toUser)
-                return res.status(400).send({
-                    message: "User with this wallet address cannot be found.",
-                });
+        const toUser = await userDB.findOne({ wallet: to }, { wallet: 1 });
+        if (!toUser) {
+            return res.status(400).send({
+                message: "User with this wallet address cannot be found.",
+            });
+        }
 
-            // Check existance of channel
-            const channels = await channelDB.aggregate([
-                {
-                    $match: {
-                        participants: {
-                            $all: [
-                                { $elemMatch: { wallet: req.user!.wallet } },
-                                { $elemMatch: { wallet: to } },
-                            ],
-                        },
+        if (to === req.user!.wallet) {
+            return res.status(400).send({
+                message: "You cannot send yourself a message (yet).",
+            });
+        }
+
+        // Check existance of channel
+        const channels = await channelDB.aggregate([
+            {
+                $match: {
+                    participants: {
+                        $all: [
+                            { $elemMatch: { wallet: req.user!.wallet } },
+                            { $elemMatch: { wallet: to } },
+                        ],
                     },
                 },
-            ]);
+            },
+        ]);
 
-            if (channels.length) {
-                const channel = channels[0];
-
-                return res.send({
-                    id: channel._id.toString(),
-                });
-            }
-
-            // Add it to database
-            const secretKey = randomBytes(32).toString("hex"); // Secret key of the channel
-
-            const newRoom = new channelDB({
-                type: "individual",
-                date: new Date(),
-                messages: [],
-                participants: [
-                    {
-                        wallet: req.user!.wallet,
-                        joinDate: new Date(),
-                    },
-                    {
-                        wallet: toUser.wallet,
-                        joinDate: new Date(), // This field will be updated after first message is sent
-                    },
-                ],
-                secret: secretKey,
-            });
-
-            await newRoom.save();
+        if (channels.length) {
+            const channel = channels[0];
 
             return res.send({
-                id: newRoom._id.toString(),
-                key: secretKey,
+                id: channel._id.toString(),
             });
-
-        } catch (e) {
-            console.error(e);
-            return res
-                .status(500)
-                .send({ message: "A server exception occured." });
         }
+
+        // Add it to database
+        const secretKey = randomBytes(32).toString("hex"); // Secret key of the channel
+
+        const newRoom = new channelDB({
+            type: "individual",
+            date: new Date(),
+            messages: [],
+            participants: [
+                {
+                    wallet: req.user!.wallet,
+                    joinDate: new Date(),
+                },
+                {
+                    wallet: toUser.wallet,
+                    joinDate: new Date(), // This field will be updated after first message is sent
+                },
+            ],
+            secret: secretKey,
+        });
+
+        await newRoom.save();
+
+        return res.send({
+            id: newRoom._id.toString(),
+            key: secretKey,
+        });
+
+    } catch (e) {
+        console.error(e);
+        return res
+            .status(500)
+            .send({ message: "A server exception occured." });
     }
-);
+});
 
 /**
  * Create a group chat
  */
-router.put("/group", E.verified, async (req: UserRequest, res: Response) => {});
+router.put("/group", E.verified, async (req: UserRequest, res: Response) => {
+    try {
+        const { groupName }: { groupName: string } = req.body;
+
+        if (!groupName)
+            return res
+                .status(400)
+                .send({ message: "Please enter a valid group name." });
+
+        // Add it to database
+        const secretKey = randomBytes(32).toString("hex"); // Secret key of the channel
+
+        const newRoom = new channelDB({
+            type: "group",
+            name: groupName,
+            date: new Date(),
+            messages: [],
+            participants: [
+                {
+                    wallet: req.user!.wallet,
+                    joinDate: new Date(),
+                }
+            ],
+            secret: secretKey,
+        });
+
+        await newRoom.save();
+
+        return res.send({
+            id: newRoom._id.toString(),
+            key: secretKey,
+        });
+
+    } catch (e) {
+        console.error(e);
+        return res
+            .status(500)
+            .send({ message: "A server exception occured." });
+    }
+});
 
 /**
  * Import chat from Discord
@@ -154,7 +199,8 @@ router.put("/import", E.verified, async (req: UserRequest, res: Response) => {
             name
         });
 
-    } catch (e) {
+    } catch (e: any) {
+        if (e?.response?.data?.code === 50004) return res.status(500).send({ message: "Server is found, but it cannot be imported." });
         console.error(e);
         return res.status(500).send({ message: "A server exception occured." });
     }
@@ -262,8 +308,6 @@ router.get("/room", E.verified, async (req: UserRequest, res: Response) => {
                 },
             },
         ]);
-
-        console.log(chat);
 
         if (!chat?.length)
             return res.status(400).send({ message: "Chat cannot be found" });

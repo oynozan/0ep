@@ -1,7 +1,44 @@
+@import '../../styles/mixins';
+
 #sidebar {
     position: relative;
     display: flex;
     z-index: 3;
+
+    @include W(1000px) {
+        display: none;
+    }
+
+    &.home-sidebar {
+        @include W(1000px) {
+            position: fixed;
+            display: flex;
+            width: 100%;
+
+            > .right {
+                width: calc(100% + 1px);
+                margin-left: -1px;
+
+                .add {
+                    position: absolute;
+                    right: 20px;
+                    bottom: 20px;
+                    padding: 0;
+                    background: transparent;
+                    color: var(--second);
+
+                    p { display: none; }
+                    svg { font-size: 50px; }
+                }
+
+                .rooms .room h5 {
+                    @include W(440px) {
+                        max-width: 200px;
+                    }
+                }
+            }
+        }
+    }
 
     > .left {
         position: relative;
@@ -121,6 +158,7 @@
         .rooms {
             flex: 1;
             overflow-y: auto;
+            overflow-x: hidden;
 
             .no-room {
                 display: flex;
@@ -159,6 +197,10 @@
                         font-size: 17px;
                         font-weight: 600;
                         color: var(--light);
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        max-width: 300px;
                     }
 
                     p {

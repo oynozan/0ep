@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 import Button from "../Button";
 import Tooltip from "../Tooltip";
@@ -17,10 +17,14 @@ import { FaCirclePlus, FaGear, FaUserSecret } from "react-icons/fa6";
 import "./sidebar.scss";
 
 export default function Sidebar() {
+    const location = useLocation();
+
+    const isHome = location.pathname === "/";
+
     const rooms = useRoomsStore(state => state.rooms);
     const chatTitle = useChatStore(state => state.title);
-    const setModal = useModalStore(state => state.setModal);
     const search = useFilterStore(state => state.search);
+    const setModal = useModalStore(state => state.setModal);
     const filter = useFilterStore(state => state.listFilter);
     const setFilter = useFilterStore(state => state.setListFilter);
 
@@ -33,7 +37,7 @@ export default function Sidebar() {
     }
 
     return (
-        <nav id="sidebar">
+        <nav id="sidebar" className={isHome ? "home-sidebar" : undefined}>
             {/* Settings & Profile Picture */}
             <div className="left">
                 <div className="logo">
@@ -123,11 +127,10 @@ export default function Sidebar() {
 
                         // Decrypt the last sent message, then show it on room link
                         const encryptedLastMessage = r.lastMessage?.message;
+
                         let decryptedLastMessage = "";
-                        if (encryptedLastMessage) {
-                            // decryptedLastMessage = decrypt(encryptedLastMessage, r.secret);
-                            decryptedLastMessage = encryptedLastMessage;
-                        }
+                        if (encryptedLastMessage)
+                            decryptedLastMessage = decrypt(encryptedLastMessage, r.secret);
 
                         const isCurrentRoom = r.title === chatTitle;
 

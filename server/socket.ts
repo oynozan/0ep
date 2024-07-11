@@ -14,14 +14,14 @@ async function getChatUser(socket: Socket, id: string, secretKey: string): Promi
     if (!token) return false;
 
     const decodedUser = Encryption.decodeJwt(token);
-    console.log(decodedUser);
+    if (!decodedUser?.wallet) return false;
 
     // Be sure user has access to the room
     const isParticipant = await channelDB.countDocuments({
         _id: new ObjectId(id),
         secret: secretKey,
         "participants.wallet": {
-            $in: decodedUser?.wallet
+            $in: [ decodedUser.wallet ]
         }
     });
 
@@ -70,9 +70,6 @@ export default function(io: SocketIOServer) {
             message = message.trim();
 
             try {
-                // const encryptedMessage = Encryption.encryptMessage(message, secretKey);
-                const encryptedMessage = message;
-
                 // Save message to database
                 await channelDB.updateOne(
                     {
@@ -82,7 +79,7 @@ export default function(io: SocketIOServer) {
                     {
                         $push: {
                             messages: {
-                                message: encryptedMessage,
+                                message,
                                 by: user.wallet,
                                 date: new Date()
                             }
@@ -91,7 +88,7 @@ export default function(io: SocketIOServer) {
                 )
     
                 io.to(id).emit('message-response', {
-                    message: encryptedMessage,
+                    message,
                     by: user.wallet,
                     date: new Date()
                 });

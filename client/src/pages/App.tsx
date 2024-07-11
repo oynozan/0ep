@@ -1,9 +1,10 @@
+import toast from 'react-hot-toast';
 import { useEffect, useState } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 
 import Cookie from "../lib/cookie";
-import { F } from "../lib/helpers";
 import { Wallet } from "../lib/wallet";
+import { F, truncateWalletAddress } from "../lib/helpers";
 import { useChatStore, useRoomsStore, useUserStore, type IUser } from "../lib/states";
 
 // Components
@@ -22,6 +23,8 @@ export default function App() {
     const pathname = useLocation().pathname;
 
     const user = useUserStore(state => state.user);
+    const chatID = useChatStore(state => state.id);
+    const setChat = useChatStore(state => state.setChat);
     const setUser = useUserStore(state => state.setUser);
     const setRooms = useRoomsStore(state => state.setRooms);
     const resetChat = useChatStore(state => state.resetChat);
@@ -87,10 +90,40 @@ export default function App() {
         }
     }, [user]);
 
+    // If user is at another page, reset chat data
     useEffect(() => {
-        // If user is at another page, reset chat data
         if (!pathname.startsWith("/c/")) resetChat();
     }, [pathname])
+
+    // If chat ID has changed, set the correct chat data
+    useEffect(() => {
+        if (chatID) {
+            F({
+                endpoint: "/channel/room?id=" + chatID,
+                method: "GET",
+            })
+                .then(room => {
+                    room = room.chat;
+
+                    setChat({
+                        id: room._id,
+                        secret: room.secret,
+                        type: room.type,
+                        title: room.title,
+                        users: room.participants,
+                        messages: room.messages,
+                        read: room.read,
+                    });
+
+                    // Set page title
+                    document.title = truncateWalletAddress(room.title) + " - 0ep";
+                })
+                .catch(err => {
+                    console.error(err);
+                    toast.error(err.message);
+                });
+        }
+    }, [chatID]);
 
     return (
         <>

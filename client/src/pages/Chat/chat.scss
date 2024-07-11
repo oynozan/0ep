@@ -1,3 +1,5 @@
+@import '../../styles/mixins';
+
 #chat {
     display: flex;
     flex-direction: column;
@@ -13,6 +15,14 @@
         flex-direction: column;
         padding: 20px 40px;
         overflow-y: auto;
+
+        @include W(768px) {
+            padding: 20px;
+        }
+
+        @include W(400px) {
+            padding: 20px 10px;
+        }
 
         .message {
             display: flex;
@@ -90,10 +100,12 @@
 
             &.single-message {
                 padding-left: 50px;
+                padding-right: 20px;
                 margin-top: 10px;
 
                 &.me {
                     padding-right: 50px;
+                    padding-left: 20px;
                 }
 
                 p {
@@ -104,6 +116,7 @@
     }
 
     .send {
+        position: relative;
         display: flex;
         align-items: center;
         gap: 10px;
@@ -111,6 +124,10 @@
         height: 70px;
         padding: 15px;
         background: var(--gray2);
+
+        @include W(768px) {
+            padding: 15px 10px;
+        }
 
         input {
             flex: 1;
@@ -129,9 +146,14 @@
             display: flex;
             align-items: center;
 
+            @include W(768px) {
+                position: absolute;
+                right: 20px;
+            }
+
             &:hover {
                 svg {
-                    color: var(--second);
+                    color: #d0b2e3;
                 }
             }
 

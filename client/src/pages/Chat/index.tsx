@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
+import { useParams } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
 
 import socket from "../../lib/socket";
-import { decrypt, F, HHMM, MMDDHHMM, truncateWalletAddress } from "../../lib/helpers";
 import ChannelPicture from '../../components/Channels/ChannelPicture';
 import { type IMessage, useChatStore, useRoomsStore, useUserStore } from "../../lib/states";
+import { decrypt, encrypt, F, HHMM, MMDDHHMM, truncateWalletAddress } from "../../lib/helpers";
 
 import { FaPaperPlane } from "react-icons/fa";
 import { RiCheckDoubleFill } from "react-icons/ri";
@@ -21,41 +21,17 @@ export default function Chat() {
     const chat = useChatStore();
     const rooms = useRoomsStore(s => s.rooms);
     const setRooms = useRoomsStore(s => s.setRooms);
-    const setChat = chat.setChat;
+    const setChatID = chat.setChatID;
 
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState<Array<any>>(chat.messages);
 
     useEffect(() => {
-        // Get chat details
-        F({
-            endpoint: "/channel/room?id=" + id,
-            method: "GET",
-        })
-            .then(room => {
-                room = room.chat;
-
-                setChat({
-                    id: room._id,
-                    secret: room.secret,
-                    type: room.type,
-                    title: room.title,
-                    users: room.participants,
-                    messages: room.messages,
-                    read: room.read,
-                });
-
-                // Set page title
-                document.title = truncateWalletAddress(room.title) + " - 0ep";
-            })
-            .catch(err => {
-                console.error(err);
-                toast.error(err.message);
-            });
+        if (id) setChatID(id)
     }, [id]);
 
     useEffect((): any => {
-        if (user && chat) {
+        if (user && chat?.id === id) {
             socket.emit("join-room", { id, secretKey: chat.secret });
 
             socket.off("join-room-response");
@@ -81,7 +57,7 @@ export default function Chat() {
                 socket.off("join-room-response");
             };
         }
-    }, [user, chat]);
+    }, [user, chat.secret]);
 
     useEffect(() => {
         socket.off("message-response");
@@ -103,12 +79,6 @@ export default function Chat() {
                 return;
             }
 
-            // Decrypt new message
-            response["message"] = decrypt(response.message, chat.secret as string);
-
-            // Add to the messages array
-            if (response.by !== user!.wallet) setMessages(s => [...s, response]);
-
             // Update last message in rooms state
             setRooms(
                 rooms.map(room =>
@@ -124,6 +94,12 @@ export default function Chat() {
                         : room
                 )
             );
+
+            // Decrypt new message
+            response["message"] = decrypt(response.message, chat.secret as string);
+
+            // Add to the messages array
+            if (response.by !== user!.wallet) setMessages(s => [...s, response]);
         });
 
         socket.on("read-data", response => {
@@ -140,12 +116,14 @@ export default function Chat() {
 
     /* Functions */
     function sendMessage() {
-        if (!message?.trim() || !user) return;
+        if (!message?.trim() || !user || !chat?.secret) return;
+
+        const encrypted = encrypt(message, chat.secret);
 
         socket.emit("send-message", {
             id,
             secretKey: chat.secret,
-            message,
+            message: encrypted,
         });
 
         // Add message in client before waiting a request from server

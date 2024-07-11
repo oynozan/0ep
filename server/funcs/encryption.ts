@@ -51,7 +51,7 @@ export default class Encryption {
     static encryptMessage(message: string, sharedSecret: string) {
         const iv = randomBytes(16);
         const cipher = createCipheriv(
-            "aes-256-gcm",
+            "aes-256-cbc",
             Buffer.from(sharedSecret, "hex"),
             iv
         );

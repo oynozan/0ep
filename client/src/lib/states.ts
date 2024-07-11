@@ -93,6 +93,16 @@ export const useChatStore = create<ChatStore>(set => ({
         })),
 }));
 
+interface ChatsStore {
+    chats: Array<IChat>;
+    setChats: (chats: Array<IChat>) => void;
+}
+
+export const useChatsStore = create<ChatsStore>(set => ({
+    chats: [],
+    setChats: (chats: Array<IChat>) => set(() => ({ chats })),
+}));
+
 interface IRoom {
     id: string;
     type: string;

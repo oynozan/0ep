@@ -22,11 +22,11 @@ export default function Modals() {
     useEffect(() => {
         setTimeout(() => {
             setSelected(selectedModal);
-        }, 250);
+        }, 180);
 
         setTimeout(() => {
             setDelayedOptions(options);
-        }, 250);
+        }, 180);
     }, [selectedModal, options]);
 
     return (

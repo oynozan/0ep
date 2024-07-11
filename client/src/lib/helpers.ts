@@ -100,8 +100,6 @@ export function MMDDHHMM(date: Date | number): string {
 
 // Encryption functions
 export function encrypt(message: string, secretKey: string): string {
-    return message;
-
     const iv = CryptoJS.lib.WordArray.random(16);
     const encrypted = CryptoJS.AES.encrypt(message, CryptoJS.enc.Hex.parse(secretKey), {
         iv: iv,
@@ -113,9 +111,9 @@ export function encrypt(message: string, secretKey: string): string {
 }
 
 export function decrypt(ciphertext: string, secretKey: string): string {
-    return ciphertext;
-
     const [ivHex, encryptedHex] = ciphertext.split(":");
+    if (!ivHex || !encryptedHex) return "";
+
     const iv = CryptoJS.enc.Hex.parse(ivHex);
     const encrypted = CryptoJS.enc.Hex.parse(encryptedHex);
 

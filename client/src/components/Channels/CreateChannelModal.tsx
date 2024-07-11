@@ -1,11 +1,14 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { FaChevronLeft, FaDiscord } from "react-icons/fa";
-import { IoPerson, IoPeople } from "react-icons/io5";
+
+import { useChatStore, useModalStore, useRoomsStore } from '../../lib/states';
 import { F } from "../../lib/helpers";
 import Button from "../Button";
+
+import { FaChevronLeft, FaDiscord } from "react-icons/fa";
+import { IoPerson, IoPeople } from "react-icons/io5";
+
 import "./channel-modal.scss";
-import { useChatStore, useModalStore, useRoomsStore } from '../../lib/states';
 
 type ChatTypes = "individual" | "group" | "imported";
 
@@ -101,10 +104,43 @@ function Individual({
 }
 
 function Group({ setType }: { setType: React.Dispatch<React.SetStateAction<ChatTypes | null>> }) {
+    const rooms = useRoomsStore(s => s.rooms);
+    const addRoom = useRoomsStore(s => s.addRoom);
+    const setModal = useModalStore(s => s.setModal);
+    const setChatID = useChatStore(s => s.setChatID);
+
     const [groupName, setGroupName] = useState("");
 
     function createGroup(): any {
         if (!groupName?.trim()) return toast.error("Please enter a group name");
+
+        F({
+            endpoint: "/channel/group",
+            method: "PUT",
+            body: {
+                groupName: groupName.trim(),
+            },
+        })
+            .then(response => {
+                setModal(null, {});
+
+                for (let room of rooms) {
+                    if (room.id === response.id) {
+                        return setChatID(room.id);
+                    }
+                }
+
+                addRoom({
+                    id: response.id,
+                    type: "group",
+                    secret: response.key,
+                    title: groupName.trim()
+                });
+            })
+            .catch(e => {
+                console.error(e);
+                toast.error(e.message);
+            });
     }
 
     return (
